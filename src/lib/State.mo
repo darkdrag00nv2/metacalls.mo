@@ -68,4 +68,17 @@ module {
             var identities = Map.new<Text, PIdentity>(thash);
         };
     };
+
+    public func addDerivedIdentity(s : State, key_name : Text, pub_key : Blob) {
+        let pident = get_pidentity(key_name, pub_key);
+        ignore Map.put(s.identities, thash, key_name, pident);
+    };
+
+    private func get_pidentity(key_name : Text, pub_key : Blob) : PIdentity {
+        {
+            key_name = key_name;
+            creation_ts = Time.now();
+            public_key = pub_key;
+        };
+    };
 };

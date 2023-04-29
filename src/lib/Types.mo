@@ -4,7 +4,7 @@ import State "State";
 
 module {
     public type CreateDerivedIdentityResponse = {
-        address : [Nat8];
+        key_name : Text;
     };
 
     public type Result<X> = {

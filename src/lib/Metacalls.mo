@@ -63,9 +63,8 @@ module {
                 };
             });
 
-            // TODO: Add to state
-
-            #Err("");
+            State.addDerivedIdentity(lib.state, key_name, public_key);
+            #Ok({ key_name = key_name });
         } catch (err) {
             #Err(Error.message(err));
         };
