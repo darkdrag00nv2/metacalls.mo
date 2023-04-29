@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "canisters": {
+    "metacalls": {
+      "type": "motoko",
+      "main": "src/bin/metacalls.mo"
+    }
+  },
+  "dfx": "0.14.0",
+  "defaults": {
+    "build": {
+      "packtool": "vessel sources",
+      "args": ""
+    }
+  }
+}
