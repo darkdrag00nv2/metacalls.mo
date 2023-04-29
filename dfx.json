@@ -3,7 +3,7 @@
   "canisters": {
     "metacalls": {
       "type": "motoko",
-      "main": "src/bin/metacalls.mo"
+      "main": "src/bin/Metacalls.mo"
     }
   },
   "dfx": "0.14.0",
