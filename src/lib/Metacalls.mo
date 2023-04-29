@@ -23,6 +23,7 @@ module {
     type IcManagement = IcManagement.IcManagement;
 
     type Result<X> = Types.Result<X>;
+    type CreateDerivedIdentityResponse = Types.CreateDerivedIdentityResponse;
 
     type State = State.State;
     type Env = State.Env;
@@ -43,5 +44,30 @@ module {
     ) : MetacallsLib = {
         icManagement = initIcManagement;
         state = State.initState(env);
+    };
+
+    /// Create a derived identity for the provided principal.
+    ///
+    /// The identity is saved in the state and can be used later to sign a transaction.
+    public func createDerivedIdentity(
+        lib : MetacallsLib,
+        key_name : Text,
+    ) : async Result<CreateDerivedIdentityResponse> {
+        try {
+            let { public_key } = await lib.icManagement.ecdsa_public_key({
+                canister_id = null;
+                derivation_path = [Text.encodeUtf8(key_name)];
+                key_id = {
+                    curve = #secp256k1;
+                    name = lib.state.config.key_name;
+                };
+            });
+
+            // TODO: Add to state
+
+            #Err("");
+        } catch (err) {
+            #Err(Error.message(err));
+        };
     };
 };

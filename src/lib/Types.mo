@@ -3,6 +3,10 @@
 import State "State";
 
 module {
+    public type CreateDerivedIdentityResponse = {
+        address : [Nat8];
+    };
+
     public type Result<X> = {
         #Ok : X;
         #Err : Text;

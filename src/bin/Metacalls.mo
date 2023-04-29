@@ -16,12 +16,20 @@ actor NoKeyWallet {
     type IcManagement = IcManagement.IcManagement;
 
     type Result<X> = Types.Result<X>;
+    type CreateDerivedIdentityResponse = Types.CreateDerivedIdentityResponse;
 
     type Env = State.Env;
 
     let ic_management : IcManagement = actor ("aaaaa-aa");
     let env : Env = #Local;
     stable let lib = Metacalls.init(ic_management, env);
+
+    /// Create an identity with the provided name.
+    ///
+    /// The identity is saved in the state and can be used later to sign a transaction.
+    public shared (msg) func createDerivedIdentity(key_name : Text) : async Result<CreateDerivedIdentityResponse> {
+        return await Metacalls.createDerivedIdentity(lib, key_name);
+    };
 
     public query func healthcheck() : async Bool { true };
 };

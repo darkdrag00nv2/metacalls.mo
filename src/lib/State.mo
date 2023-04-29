@@ -13,7 +13,7 @@ module {
     type StableBuffer<X> = StableBuffer.StableBuffer<X>;
     type Time = Time.Time;
 
-    let { phash; n64hash } = Map;
+    let { thash } = Map;
 
     public type Env = {
         #Local;
@@ -27,8 +27,15 @@ module {
         sign_cycles : Nat;
     };
 
+    public type PIdentity = {
+        key_name : Text;
+        creation_ts : Time;
+        public_key : Blob;
+    };
+
     public type State = {
         config : Config;
+        var identities : Map<Text, PIdentity>;
     };
 
     public func initState(env : Env) : State {
@@ -58,6 +65,7 @@ module {
 
         {
             config = config;
+            var identities = Map.new<Text, PIdentity>(thash);
         };
     };
 };
