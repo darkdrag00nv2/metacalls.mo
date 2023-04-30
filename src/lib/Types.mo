@@ -28,6 +28,21 @@ module {
 
     public type SignMessageResponse = {};
 
+    public type SendOutgoingMessageRequest = {
+        msg_uuid : UUID;
+        url : Text;
+        headers : [HttpHeader];
+        method : HttpMethod;
+        transform : ?TransformContext;
+        max_response_bytes : ?Nat64;
+    };
+
+    public type SendOutgoingMessageResponse = {
+        status : Nat;
+        headers : [HttpHeader];
+        body : [Nat8];
+    };
+
     public type Result<X> = {
         #Ok : X;
         #Err : Text;

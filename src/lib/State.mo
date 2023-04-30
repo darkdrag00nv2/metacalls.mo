@@ -9,12 +9,15 @@ import StableBuffer "mo:stable_buffer/StableBuffer";
 import Time "mo:base/Time";
 import UUID "mo:uuid/UUID";
 import Text "mo:base/Text";
+import Types "Types";
 
 module {
     type Map<K, V> = Map.Map<K, V>;
     type StableBuffer<X> = StableBuffer.StableBuffer<X>;
     type Time = Time.Time;
     type UUID = UUID.UUID;
+
+    type SendOutgoingMessageResponse = Types.SendOutgoingMessageResponse;
 
     let { thash } = Map;
 
@@ -45,12 +48,13 @@ module {
     public type Message = {
         uuid : UUID;
         creation_ts : Time;
-        last_updated_ts : Time;
         original_message : Text;
         hashed_message : [Nat8];
+        var last_updated_ts : Time;
         var signed_message : ?Blob;
         var signed_by : ?Text;
         var status : MessageStatus;
+        var response : ?SendOutgoingMessageResponse;
     };
 
     public type State = {

@@ -21,6 +21,8 @@ import Iter "mo:base/Iter";
 import Source "mo:uuid/async/SourceV4";
 import Time "mo:base/Time";
 import Sha256 "mo:motoko-sha/SHA256";
+import Set "mo:stable_hash_map/Set/Set";
+import Nat "mo:base/Nat";
 
 module {
     type IcManagement = IcManagement.IcManagement;
@@ -32,6 +34,8 @@ module {
     type CreateMessageResponse = Types.CreateMessageResponse;
     type SignMessageRequest = Types.SignMessageRequest;
     type SignMessageResponse = Types.SignMessageResponse;
+    type SendOutgoingMessageRequest = Types.SendOutgoingMessageRequest;
+    type SendOutgoingMessageResponse = Types.SendOutgoingMessageResponse;
 
     type State = State.State;
     type Env = State.Env;
@@ -90,12 +94,13 @@ module {
         let message : Message = {
             uuid = id;
             creation_ts = ts;
-            last_updated_ts = ts;
             original_message = req.msg;
             hashed_message = Sha256.sha256(Blob.toArray(Text.encodeUtf8(req.msg)));
+            var last_updated_ts = ts;
             var signed_message = null;
             var signed_by = null;
             var status = #Created;
+            var response = null;
         };
         State.setMessage(lib.state, id, message);
 
@@ -126,8 +131,53 @@ module {
         msg.signed_message := ?signature;
         msg.signed_by := ?req.key_name;
         msg.status := #Signed;
+        msg.last_updated_ts := Time.now();
         State.setMessage(lib.state, req.uuid, msg);
 
         #Ok({});
+    };
+
+    public func sendOutgoingMessage(
+        lib : MetacallsLib,
+        req : SendOutgoingMessageRequest,
+    ) : async Result<SendOutgoingMessageResponse> {
+        let ?msg = State.getMessage(lib.state, req.msg_uuid) else {
+            return #Err("The message with the given uuid does not exist");
+        };
+        if (msg.status != #Signed) {
+            return #Err("Only signed messages can be sent");
+        };
+        let ?signed_msg = msg.signed_message else {
+            return #Err("Inconsistent state. status = #Signed but signed_message = null");
+        };
+
+        let request : Types.CanisterHttpRequestArgs = {
+            url = req.url;
+            max_response_bytes = req.max_response_bytes;
+            headers = req.headers;
+            body = ?Blob.toArray(signed_msg);
+            method = req.method;
+            transform = req.transform;
+        };
+
+        try {
+            Cycles.add(lib.state.config.sign_cycles);
+            let response = await lib.icManagement.http_request(request);
+
+            let sendOutgoingMessageResponse : SendOutgoingMessageResponse = {
+                headers = response.headers;
+                status = response.status;
+                body = response.body;
+            };
+
+            msg.status := #Sent;
+            msg.last_updated_ts := Time.now();
+            msg.response := ?sendOutgoingMessageResponse;
+            State.setMessage(lib.state, req.msg_uuid, msg);
+
+            #Ok(sendOutgoingMessageResponse);
+        } catch (err) {
+            #Err(Error.message(err));
+        };
     };
 };
