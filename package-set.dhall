@@ -23,6 +23,16 @@ let
         version = "v0.4.1",
         dependencies = [ "base-0.7.3"]
       },
+      { name = "array"
+      , version = "v0.2.1"
+      , repo = "https://github.com/aviate-labs/array.mo"
+      , dependencies = [ "base-0.7.3" ] : List Text
+      },
+      { name = "uuid", 
+        repo = "https://github.com/aviate-labs/uuid.mo",
+        version = "v0.2.1",
+        dependencies = [ "base-0.7.3", "base", "array"]
+      }
     ] : List Package
 
 let

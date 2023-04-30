@@ -7,11 +7,14 @@ import Principal "mo:base/Principal";
 import Blob "mo:base/Blob";
 import StableBuffer "mo:stable_buffer/StableBuffer";
 import Time "mo:base/Time";
+import UUID "mo:uuid/UUID";
+import Text "mo:base/Text";
 
 module {
     type Map<K, V> = Map.Map<K, V>;
     type StableBuffer<X> = StableBuffer.StableBuffer<X>;
     type Time = Time.Time;
+    type UUID = UUID.UUID;
 
     let { thash } = Map;
 
@@ -33,9 +36,24 @@ module {
         public_key : Blob;
     };
 
+    public type MessageStatus = {
+        #Created;
+        #Signed;
+        #Sent;
+    };
+
+    public type Message = {
+        uuid : UUID;
+        creation_ts : Time;
+        last_updated_ts : Time;
+        original_message : Text;
+        status : MessageStatus;
+    };
+
     public type State = {
         config : Config;
         var identities : Map<Text, PIdentity>;
+        var messages : Map<Text, Message>;
     };
 
     public func initState(env : Env) : State {
@@ -66,6 +84,7 @@ module {
         {
             config = config;
             var identities = Map.new<Text, PIdentity>(thash);
+            var messages = Map.new<Text, Message>(thash);
         };
     };
 
@@ -80,5 +99,9 @@ module {
             creation_ts = Time.now();
             public_key = pub_key;
         };
+    };
+
+    public func addMessage(s : State, uuid : UUID, msg : Message) {
+        ignore Map.put(s.messages, thash, UUID.toText(uuid), msg);
     };
 };

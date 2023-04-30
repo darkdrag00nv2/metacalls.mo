@@ -17,6 +17,10 @@ actor NoKeyWallet {
 
     type Result<X> = Types.Result<X>;
     type CreateDerivedIdentityResponse = Types.CreateDerivedIdentityResponse;
+    type CreateMessageRequest = Types.CreateMessageRequest;
+    type CreateMessageResponse = Types.CreateMessageResponse;
+    type SignMessageRequest = Types.SignMessageRequest;
+    type SignMessageResponse = Types.SignMessageResponse;
 
     type Env = State.Env;
 
@@ -29,6 +33,15 @@ actor NoKeyWallet {
     /// The identity is saved in the state and can be used later to sign a transaction.
     public shared (msg) func createDerivedIdentity(key_name : Text) : async Result<CreateDerivedIdentityResponse> {
         return await Metacalls.createDerivedIdentity(lib, key_name);
+    };
+
+    /// Create a message which can be signed and sent later.
+    public shared (msg) func createMessage(req : CreateMessageRequest) : async Result<CreateMessageResponse> {
+        return await Metacalls.createMessage(lib, req);
+    };
+
+    public shared (msg) func signMessage(req : SignMessageRequest) : async Result<SignMessageResponse> {
+        #Err("TODO");
     };
 
     public query func healthcheck() : async Bool { true };

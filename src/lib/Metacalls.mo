@@ -18,15 +18,21 @@ import StableBuffer "mo:stable_buffer/StableBuffer";
 import Binary "mo:encoding/Binary";
 import Text "mo:base/Text";
 import Iter "mo:base/Iter";
+import Source "mo:uuid/async/SourceV4";
+import Time "mo:base/Time";
 
 module {
     type IcManagement = IcManagement.IcManagement;
+    type Time = Time.Time;
 
     type Result<X> = Types.Result<X>;
     type CreateDerivedIdentityResponse = Types.CreateDerivedIdentityResponse;
+    type CreateMessageRequest = Types.CreateMessageRequest;
+    type CreateMessageResponse = Types.CreateMessageResponse;
 
     type State = State.State;
     type Env = State.Env;
+    type Message = State.Message;
 
     type Buffer<X> = Buffer.Buffer<X>;
     type Map<K, V> = Map.Map<K, V>;
@@ -68,5 +74,24 @@ module {
         } catch (err) {
             #Err(Error.message(err));
         };
+    };
+
+    public func createMessage(
+        lib : MetacallsLib,
+        req : CreateMessageRequest,
+    ) : async Result<CreateMessageResponse> {
+        let id = await Source.Source().new();
+        let ts = Time.now();
+
+        let message : Message = {
+            uuid = id;
+            creation_ts = ts;
+            last_updated_ts = ts;
+            original_message = req.msg;
+            status = #Created;
+        };
+        State.addMessage(lib.state, id, message);
+
+        #Ok({ uuid = id });
     };
 };

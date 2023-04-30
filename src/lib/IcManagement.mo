@@ -1,6 +1,8 @@
 /// The IC Management Canister interface used by the library.
 ///
-/// Used by the library for creating public keys and signing messages.
+/// Used by the library for creating public keys, signing messages and outgoing calls.
+
+import Types "../lib/Types";
 
 module {
     public type IcManagement = actor {
@@ -15,5 +17,7 @@ module {
             derivation_path : [Blob];
             key_id : { curve : { #secp256k1 }; name : Text };
         }) -> async ({ signature : Blob });
+
+        http_request : Types.CanisterHttpRequestArgs -> async Types.CanisterHttpResponsePayload;
     };
 };
