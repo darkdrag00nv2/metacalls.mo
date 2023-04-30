@@ -20,6 +20,7 @@ import Text "mo:base/Text";
 import Iter "mo:base/Iter";
 import Source "mo:uuid/async/SourceV4";
 import Time "mo:base/Time";
+import Sha256 "mo:motoko-sha/SHA256";
 
 module {
     type IcManagement = IcManagement.IcManagement;
@@ -29,6 +30,8 @@ module {
     type CreateDerivedIdentityResponse = Types.CreateDerivedIdentityResponse;
     type CreateMessageRequest = Types.CreateMessageRequest;
     type CreateMessageResponse = Types.CreateMessageResponse;
+    type SignMessageRequest = Types.SignMessageRequest;
+    type SignMessageResponse = Types.SignMessageResponse;
 
     type State = State.State;
     type Env = State.Env;
@@ -76,6 +79,7 @@ module {
         };
     };
 
+    /// Create a message which can be signed and sent later.
     public func createMessage(
         lib : MetacallsLib,
         req : CreateMessageRequest,
@@ -88,10 +92,42 @@ module {
             creation_ts = ts;
             last_updated_ts = ts;
             original_message = req.msg;
-            status = #Created;
+            hashed_message = Sha256.sha256(Blob.toArray(Text.encodeUtf8(req.msg)));
+            var signed_message = null;
+            var signed_by = null;
+            var status = #Created;
         };
-        State.addMessage(lib.state, id, message);
+        State.setMessage(lib.state, id, message);
 
         #Ok({ uuid = id });
+    };
+
+    public func signMessage(
+        lib : MetacallsLib,
+        req : SignMessageRequest,
+    ) : async Result<SignMessageResponse> {
+        let ?msg = State.getMessage(lib.state, req.uuid) else {
+            return #Err("The message with the given uuid does not exist");
+        };
+        let ?identity = State.getDerivedIdentity(lib.state, req.key_name) else {
+            return #Err("The key with the given name does not exist");
+        };
+
+        Cycles.add(lib.state.config.sign_cycles);
+        let { signature } = await lib.icManagement.sign_with_ecdsa({
+            message_hash = Blob.fromArray(msg.hashed_message);
+            derivation_path = [Text.encodeUtf8(req.key_name)];
+            key_id = {
+                curve = #secp256k1;
+                name = lib.state.config.key_name;
+            };
+        });
+
+        msg.signed_message := ?signature;
+        msg.signed_by := ?req.key_name;
+        msg.status := #Signed;
+        State.setMessage(lib.state, req.uuid, msg);
+
+        #Ok({});
     };
 };

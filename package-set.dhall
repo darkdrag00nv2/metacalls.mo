@@ -32,6 +32,11 @@ let
         repo = "https://github.com/aviate-labs/uuid.mo",
         version = "v0.2.1",
         dependencies = [ "base-0.7.3", "base", "array"]
+      },
+      { name = "motoko-sha", 
+        repo = "https://github.com/enzoh/motoko-sha",
+        version = "9e2468f51ef060ae04fde8d573183191bda30189",
+        dependencies = [ "base" ]  
       }
     ] : List Package
 

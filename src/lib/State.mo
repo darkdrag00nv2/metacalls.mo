@@ -47,7 +47,10 @@ module {
         creation_ts : Time;
         last_updated_ts : Time;
         original_message : Text;
-        status : MessageStatus;
+        hashed_message : [Nat8];
+        var signed_message : ?Blob;
+        var signed_by : ?Text;
+        var status : MessageStatus;
     };
 
     public type State = {
@@ -90,7 +93,7 @@ module {
 
     public func addDerivedIdentity(s : State, key_name : Text, pub_key : Blob) {
         let pident = get_pidentity(key_name, pub_key);
-        ignore Map.put(s.identities, thash, key_name, pident);
+        Map.set(s.identities, thash, key_name, pident);
     };
 
     private func get_pidentity(key_name : Text, pub_key : Blob) : PIdentity {
@@ -101,7 +104,15 @@ module {
         };
     };
 
-    public func addMessage(s : State, uuid : UUID, msg : Message) {
-        ignore Map.put(s.messages, thash, UUID.toText(uuid), msg);
+    public func getDerivedIdentity(s : State, key_name : Text) : ?PIdentity {
+        Map.get(s.identities, thash, key_name);
+    };
+
+    public func setMessage(s : State, uuid : UUID, msg : Message) {
+        Map.set(s.messages, thash, UUID.toText(uuid), msg);
+    };
+
+    public func getMessage(s : State, uuid : UUID) : ?Message {
+        Map.get(s.messages, thash, UUID.toText(uuid));
     };
 };

@@ -20,6 +20,7 @@ module {
         uuid : UUID;
     };
 
+    /// The request to sign a message identified by the uuid and to be signed by an earlier generated key.
     public type SignMessageRequest = {
         uuid : UUID;
         key_name : Text;
