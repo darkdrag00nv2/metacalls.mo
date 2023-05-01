@@ -20,6 +20,7 @@ module {
     type Time = Time.Time;
     type UUID = UUID.UUID;
     type PIdentity = Common.PIdentity;
+    type Message = Common.Message;
 
     type SendOutgoingMessageResponse = Types.SendOutgoingMessageResponse;
 
@@ -41,18 +42,6 @@ module {
         #Created;
         #Signed;
         #Sent;
-    };
-
-    public type Message = {
-        uuid : UUID;
-        creation_ts : Time;
-        original_message : Text;
-        hashed_message : [Nat8];
-        var last_updated_ts : Time;
-        var signed_message : ?Blob;
-        var signed_by : ?Text;
-        var status : MessageStatus;
-        var response : ?SendOutgoingMessageResponse;
     };
 
     public type State = {
@@ -124,5 +113,13 @@ module {
 
     public func getMessage(s : State, uuid : UUID) : ?Message {
         Map.get(s.messages, thash, UUID.toText(uuid));
+    };
+
+    public func getAllMessages(s : State) : [Message] {
+        let res = Buffer.Buffer<Message>(0);
+        for (msg in Map.vals(s.messages)) {
+            res.add(msg);
+        };
+        Buffer.toArray(res);
     };
 };

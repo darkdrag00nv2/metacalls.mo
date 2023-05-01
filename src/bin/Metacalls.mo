@@ -24,6 +24,7 @@ actor NoKeyWallet {
     type SignMessageResponse = Types.SignMessageResponse;
     type SendOutgoingMessageRequest = Types.SendOutgoingMessageRequest;
     type SendOutgoingMessageResponse = Types.SendOutgoingMessageResponse;
+    type ListMessagesResponse = Types.ListMessagesResponse;
 
     type Env = State.Env;
 
@@ -55,8 +56,8 @@ actor NoKeyWallet {
         return await Metacalls.sendOutgoingMessage(lib, req);
     };
 
-    public shared (msg) func listMessages() : async Result<()> {
-        #Err("todo");
+    public shared (msg) func listMessages() : async Result<ListMessagesResponse> {
+        return await Metacalls.listMessages(lib);
     };
 
     public query func healthcheck() : async Bool { true };

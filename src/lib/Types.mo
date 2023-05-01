@@ -37,56 +37,24 @@ module {
     public type SendOutgoingMessageRequest = {
         msg_uuid : UUID;
         url : Text;
-        headers : [HttpHeader];
-        method : HttpMethod;
-        transform : ?TransformContext;
+        headers : [Common.HttpHeader];
+        method : Common.HttpMethod;
+        transform : ?Common.TransformContext;
         max_response_bytes : ?Nat64;
     };
 
     public type SendOutgoingMessageResponse = {
         status : Nat;
-        headers : [HttpHeader];
+        headers : [Common.HttpHeader];
         body : [Nat8];
+    };
+
+    public type ListMessagesResponse = {
+        messages : [Common.MessageImmutable];
     };
 
     public type Result<X> = {
         #Ok : X;
         #Err : Text;
-    };
-
-    public type HttpHeader = {
-        name : Text;
-        value : Text;
-    };
-
-    public type HttpMethod = {
-        #get;
-        #post;
-        #head;
-    };
-
-    public type TransformContext = {
-        function : shared query TransformArgs -> async CanisterHttpResponsePayload;
-        context : Blob;
-    };
-
-    public type CanisterHttpRequestArgs = {
-        url : Text;
-        max_response_bytes : ?Nat64;
-        headers : [HttpHeader];
-        body : ?[Nat8];
-        method : HttpMethod;
-        transform : ?TransformContext;
-    };
-
-    public type CanisterHttpResponsePayload = {
-        status : Nat;
-        headers : [HttpHeader];
-        body : [Nat8];
-    };
-
-    public type TransformArgs = {
-        response : CanisterHttpResponsePayload;
-        context : Blob;
     };
 };

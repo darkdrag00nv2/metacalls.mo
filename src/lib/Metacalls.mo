@@ -2,6 +2,7 @@
 ///
 /// TODO
 import Types "Types";
+import Common "Common";
 import Principal "mo:base/Principal";
 import IcManagement "IcManagement";
 import Error "mo:base/Error";
@@ -37,10 +38,12 @@ module {
     type SignMessageResponse = Types.SignMessageResponse;
     type SendOutgoingMessageRequest = Types.SendOutgoingMessageRequest;
     type SendOutgoingMessageResponse = Types.SendOutgoingMessageResponse;
+    type ListMessagesResponse = Types.ListMessagesResponse;
 
     type State = State.State;
     type Env = State.Env;
-    type Message = State.Message;
+    type Message = Common.Message;
+    type MessageImmutable = Common.MessageImmutable;
 
     type Buffer<X> = Buffer.Buffer<X>;
     type Map<K, V> = Map.Map<K, V>;
@@ -159,7 +162,7 @@ module {
             return #Err("Inconsistent state. status = #Signed but signed_message = null");
         };
 
-        let request : Types.CanisterHttpRequestArgs = {
+        let request : Common.CanisterHttpRequestArgs = {
             url = req.url;
             max_response_bytes = req.max_response_bytes;
             headers = req.headers;
@@ -180,12 +183,35 @@ module {
 
             msg.status := #Sent;
             msg.last_updated_ts := Time.now();
-            msg.response := ?sendOutgoingMessageResponse;
+            msg.response := ?response;
             State.setMessage(lib.state, req.msg_uuid, msg);
 
             #Ok(sendOutgoingMessageResponse);
         } catch (err) {
             #Err(Error.message(err));
         };
+    };
+
+    public func listMessages(
+        lib : MetacallsLib
+    ) : async Result<ListMessagesResponse> {
+        let msgs = State.getAllMessages(lib.state);
+
+        let res = Buffer.Buffer<MessageImmutable>(0);
+        for (msg in Array.vals(msgs)) {
+            res.add({
+                uuid = msg.uuid;
+                creation_ts = msg.creation_ts;
+                original_message = msg.original_message;
+                hashed_message = msg.hashed_message;
+                last_updated_ts = msg.last_updated_ts;
+                signed_message = msg.signed_message;
+                signed_by = msg.signed_by;
+                status = msg.status;
+                response = msg.response;
+            });
+        };
+
+        #Ok({ messages = Buffer.toArray(res) });
     };
 };

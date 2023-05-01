@@ -2,7 +2,7 @@
 ///
 /// Used by the library for creating public keys, signing messages and outgoing calls.
 
-import Types "../lib/Types";
+import Common "../lib/Common";
 
 module {
     public type IcManagement = actor {
@@ -18,6 +18,6 @@ module {
             key_id : { curve : { #secp256k1 }; name : Text };
         }) -> async ({ signature : Blob });
 
-        http_request : Types.CanisterHttpRequestArgs -> async Types.CanisterHttpResponsePayload;
+        http_request : Common.CanisterHttpRequestArgs -> async Common.CanisterHttpResponsePayload;
     };
 };
