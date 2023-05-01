@@ -39,6 +39,7 @@ module {
     type SendOutgoingMessageRequest = Types.SendOutgoingMessageRequest;
     type SendOutgoingMessageResponse = Types.SendOutgoingMessageResponse;
     type ListMessagesResponse = Types.ListMessagesResponse;
+    type CleanupExpiredMessagesResponse = Types.CleanupExpiredMessagesResponse;
 
     type State = State.State;
     type Env = State.Env;
@@ -215,8 +216,13 @@ module {
         #Ok({ messages = Buffer.toArray(res) });
     };
 
-    public func updateMessageTtl(lib : MetacallsLib, new_ttl_secs : Nat64) : async Result<()> {
+    public func updateMessageTtl(lib : MetacallsLib, new_ttl_secs : Int) : async Result<()> {
         State.updateMessageTtl(lib.state, new_ttl_secs);
         #Ok(());
+    };
+
+    public func cleanupExpiredMessages(lib : MetacallsLib) : async Result<CleanupExpiredMessagesResponse> {
+        let expired_msg_uuids = State.cleanupExpiredMessages(lib.state);
+        #Ok({ expired_msg_uuids = expired_msg_uuids });
     };
 };

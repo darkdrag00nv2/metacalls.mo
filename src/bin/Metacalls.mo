@@ -25,6 +25,7 @@ actor NoKeyWallet {
     type SendOutgoingMessageRequest = Types.SendOutgoingMessageRequest;
     type SendOutgoingMessageResponse = Types.SendOutgoingMessageResponse;
     type ListMessagesResponse = Types.ListMessagesResponse;
+    type CleanupExpiredMessagesResponse = Types.CleanupExpiredMessagesResponse;
 
     type Env = State.Env;
 
@@ -60,8 +61,12 @@ actor NoKeyWallet {
         return await Metacalls.listMessages(lib);
     };
 
-    public shared (msg) func updateMessageTtl(new_ttl_secs : Nat64) : async Result<()> {
+    public shared (msg) func updateMessageTtl(new_ttl_secs : Int) : async Result<()> {
         return await Metacalls.updateMessageTtl(lib, new_ttl_secs);
+    };
+
+    public shared (msg) func cleanupExpiredMessages() : async Result<CleanupExpiredMessagesResponse> {
+        return await Metacalls.cleanupExpiredMessages(lib);
     };
 
     public query func healthcheck() : async Bool { true };

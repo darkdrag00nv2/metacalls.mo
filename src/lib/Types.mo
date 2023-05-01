@@ -53,6 +53,10 @@ module {
         messages : [Common.MessageImmutable];
     };
 
+    public type CleanupExpiredMessagesResponse = {
+        expired_msg_uuids : [UUID];
+    };
+
     public type Result<X> = {
         #Ok : X;
         #Err : Text;

@@ -5,6 +5,7 @@
 import Map "mo:stable_hash_map/Map/Map";
 import Principal "mo:base/Principal";
 import Blob "mo:base/Blob";
+import Array "mo:base/Array";
 import StableBuffer "mo:stable_buffer/StableBuffer";
 import Time "mo:base/Time";
 import UUID "mo:uuid/UUID";
@@ -36,7 +37,7 @@ module {
         env : Env;
         key_name : Text;
         sign_cycles : Nat;
-        var message_ttl_secs : Nat64;
+        var message_ttl_secs : Int;
     };
 
     public type MessageStatus = {
@@ -127,7 +128,25 @@ module {
         Buffer.toArray(res);
     };
 
-    public func updateMessageTtl(s : State, new_ttl_secs : Nat64) {
+    public func updateMessageTtl(s : State, new_ttl_secs : Int) {
         s.config.message_ttl_secs := new_ttl_secs;
+    };
+
+    public func cleanupExpiredMessages(s : State) : [UUID] {
+        let now = Time.now();
+
+        let expired_msg_ids = Buffer.Buffer<UUID>(0);
+        for (msg in Map.vals(s.messages)) {
+            let elapsedSeconds = (now - msg.creation_ts) / 1000_000_000;
+            if (elapsedSeconds >= s.config.message_ttl_secs) {
+                expired_msg_ids.add(msg.uuid);
+            };
+        };
+
+        for (id in expired_msg_ids.vals()) {
+            Map.delete(s.messages, thash, UUID.toText(id));
+        };
+
+        Buffer.toArray(expired_msg_ids);
     };
 };
