@@ -214,4 +214,9 @@ module {
 
         #Ok({ messages = Buffer.toArray(res) });
     };
+
+    public func updateMessageTtl(lib : MetacallsLib, new_ttl_secs : Nat64) : async Result<()> {
+        State.updateMessageTtl(lib.state, new_ttl_secs);
+        #Ok(());
+    };
 };

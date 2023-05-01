@@ -60,5 +60,9 @@ actor NoKeyWallet {
         return await Metacalls.listMessages(lib);
     };
 
+    public shared (msg) func updateMessageTtl(new_ttl_secs : Nat64) : async Result<()> {
+        return await Metacalls.updateMessageTtl(lib, new_ttl_secs);
+    };
+
     public query func healthcheck() : async Bool { true };
 };

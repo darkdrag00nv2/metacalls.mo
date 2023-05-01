@@ -36,6 +36,7 @@ module {
         env : Env;
         key_name : Text;
         sign_cycles : Nat;
+        var message_ttl_secs : Nat64;
     };
 
     public type MessageStatus = {
@@ -57,6 +58,7 @@ module {
                     env = env;
                     key_name = "dfx_test_key";
                     sign_cycles = 0;
+                    var message_ttl_secs = 3600;
                 };
             };
             case (#Staging) {
@@ -64,6 +66,7 @@ module {
                     env = env;
                     key_name = "test_key_1";
                     sign_cycles = 10_000_000_000;
+                    var message_ttl_secs = 3600;
                 };
             };
             case (#Production) {
@@ -71,6 +74,7 @@ module {
                     env = env;
                     key_name = "key_1";
                     sign_cycles = 26_153_846_153;
+                    var message_ttl_secs = 3600;
                 };
             };
         };
@@ -121,5 +125,9 @@ module {
             res.add(msg);
         };
         Buffer.toArray(res);
+    };
+
+    public func updateMessageTtl(s : State, new_ttl_secs : Nat64) {
+        s.config.message_ttl_secs := new_ttl_secs;
     };
 };
