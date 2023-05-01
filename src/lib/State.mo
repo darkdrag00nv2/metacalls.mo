@@ -10,12 +10,16 @@ import Time "mo:base/Time";
 import UUID "mo:uuid/UUID";
 import Text "mo:base/Text";
 import Types "Types";
+import Buffer "mo:base/Buffer";
+import Common "Common";
 
 module {
+    type Buffer<X> = Buffer.Buffer<X>;
     type Map<K, V> = Map.Map<K, V>;
     type StableBuffer<X> = StableBuffer.StableBuffer<X>;
     type Time = Time.Time;
     type UUID = UUID.UUID;
+    type PIdentity = Common.PIdentity;
 
     type SendOutgoingMessageResponse = Types.SendOutgoingMessageResponse;
 
@@ -31,12 +35,6 @@ module {
         env : Env;
         key_name : Text;
         sign_cycles : Nat;
-    };
-
-    public type PIdentity = {
-        key_name : Text;
-        creation_ts : Time;
-        public_key : Blob;
     };
 
     public type MessageStatus = {
@@ -110,6 +108,14 @@ module {
 
     public func getDerivedIdentity(s : State, key_name : Text) : ?PIdentity {
         Map.get(s.identities, thash, key_name);
+    };
+
+    public func getAllDerivedIdentities(s : State) : [PIdentity] {
+        let res = Buffer.Buffer<PIdentity>(0);
+        for (identities in Map.vals(s.identities)) {
+            res.add(identities);
+        };
+        Buffer.toArray(res);
     };
 
     public func setMessage(s : State, uuid : UUID, msg : Message) {

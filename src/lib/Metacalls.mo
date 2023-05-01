@@ -30,6 +30,7 @@ module {
 
     type Result<X> = Types.Result<X>;
     type CreateDerivedIdentityResponse = Types.CreateDerivedIdentityResponse;
+    type ListDerivedIdentitiesResponse = Types.ListDerivedIdentitiesResponse;
     type CreateMessageRequest = Types.CreateMessageRequest;
     type CreateMessageResponse = Types.CreateMessageResponse;
     type SignMessageRequest = Types.SignMessageRequest;
@@ -81,6 +82,13 @@ module {
         } catch (err) {
             #Err(Error.message(err));
         };
+    };
+
+    public func listDerivedIdentities(
+        lib : MetacallsLib
+    ) : async Result<ListDerivedIdentitiesResponse> {
+        let identities = State.getAllDerivedIdentities(lib.state);
+        #Ok({ identities = identities });
     };
 
     /// Create a message which can be signed and sent later.

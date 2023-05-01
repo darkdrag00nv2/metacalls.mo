@@ -1,12 +1,18 @@
 /// Type declarations for the library.
 
 import UUID "mo:uuid/UUID";
+import Common "Common";
 
 module {
     type UUID = UUID.UUID;
+    type PIdentity = Common.PIdentity;
 
     public type CreateDerivedIdentityResponse = {
         key_name : Text;
+    };
+
+    public type ListDerivedIdentitiesResponse = {
+        identities : [PIdentity];
     };
 
     public type CreateMessageRequest = {

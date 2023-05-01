@@ -17,6 +17,7 @@ actor NoKeyWallet {
 
     type Result<X> = Types.Result<X>;
     type CreateDerivedIdentityResponse = Types.CreateDerivedIdentityResponse;
+    type ListDerivedIdentitiesResponse = Types.ListDerivedIdentitiesResponse;
     type CreateMessageRequest = Types.CreateMessageRequest;
     type CreateMessageResponse = Types.CreateMessageResponse;
     type SignMessageRequest = Types.SignMessageRequest;
@@ -37,6 +38,10 @@ actor NoKeyWallet {
         return await Metacalls.createDerivedIdentity(lib, key_name);
     };
 
+    public shared (msg) func listDerivedIdentities() : async Result<ListDerivedIdentitiesResponse> {
+        return await Metacalls.listDerivedIdentities(lib);
+    };
+
     /// Create a message which can be signed and sent later.
     public shared (msg) func createMessage(req : CreateMessageRequest) : async Result<CreateMessageResponse> {
         return await Metacalls.createMessage(lib, req);
@@ -48,6 +53,10 @@ actor NoKeyWallet {
 
     public shared (msg) func sendOutgoingMessage(req : SendOutgoingMessageRequest) : async Result<SendOutgoingMessageResponse> {
         return await Metacalls.sendOutgoingMessage(lib, req);
+    };
+
+    public shared (msg) func listMessages() : async Result<()> {
+        #Err("todo");
     };
 
     public query func healthcheck() : async Bool { true };
