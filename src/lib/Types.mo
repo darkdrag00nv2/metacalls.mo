@@ -15,6 +15,7 @@ module {
         identities : [PIdentity];
     };
 
+    /// The request to create a message with given body which can be later signed and sent via `http_request`.
     public type CreateMessageRequest = {
         msg : Text;
     };

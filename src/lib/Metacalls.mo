@@ -88,6 +88,7 @@ module {
         };
     };
 
+    /// List all the derived identities (t-ecdsa keys) that have been generated.
     public func listDerivedIdentities(
         lib : MetacallsLib
     ) : async Result<ListDerivedIdentitiesResponse> {
@@ -119,6 +120,12 @@ module {
         #Ok({ uuid = id });
     };
 
+    /// Sign a message with the provided `key_name`.
+    ///
+    /// Requirements:
+    /// - The message identified by the `uuid` must have already been created.
+    /// - The key identified by the `key_name` must have already been created.
+    /// - Enough cycles should exist to be able to call ic for signing.
     public func signMessage(
         lib : MetacallsLib,
         req : SignMessageRequest,
@@ -149,6 +156,15 @@ module {
         #Ok({});
     };
 
+    /// Send a signed message to the provided http endpoint using `http_request`.
+    ///
+    /// General Requirements:
+    /// - The message identified by the `uuid` must have already been created & signed.
+    /// - Enough cycles should exist to be able to call ic for `http_request`.
+    ///
+    /// Idempotency Requirements:
+    /// - Response from the http endpoint must be similar after applying the optional `transform` function.
+    /// - Post requests must be idempotent since each replica makes the call.
     public func sendOutgoingMessage(
         lib : MetacallsLib,
         req : SendOutgoingMessageRequest,
@@ -193,6 +209,7 @@ module {
         };
     };
 
+    /// List all the messages stored in the state.
     public func listMessages(
         lib : MetacallsLib
     ) : async Result<ListMessagesResponse> {
@@ -216,11 +233,15 @@ module {
         #Ok({ messages = Buffer.toArray(res) });
     };
 
+    /// Update the `message_ttl_secs` config used to determine message expiration.
     public func updateMessageTtl(lib : MetacallsLib, new_ttl_secs : Int) : async Result<()> {
         State.updateMessageTtl(lib.state, new_ttl_secs);
         #Ok(());
     };
 
+    /// Trigger the cleanup of expired messages from the state.
+    ///
+    /// The expiry of a message is determined based on its creation_ts and the `message_ttl_secs` config.
     public func cleanupExpiredMessages(lib : MetacallsLib) : async Result<CleanupExpiredMessagesResponse> {
         let expired_msg_uuids = State.cleanupExpiredMessages(lib.state);
         #Ok({ expired_msg_uuids = expired_msg_uuids });
