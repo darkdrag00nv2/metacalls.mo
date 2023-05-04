@@ -18,4 +18,10 @@ The documentation can be found at https://darkdrag00nv2.github.io/metacalls.mo/
 - [SHA-256](https://github.com/enzoh/motoko-sha)
 
 ### Development
-TODO
+You just need a dfx development environment.
+
+To run the tests locally, execute the following command
+
+```bash
+./test.sh
+```

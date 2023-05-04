@@ -4,6 +4,10 @@
     "metacalls": {
       "type": "motoko",
       "main": "src/bin/Metacalls.mo"
+    },
+    "metacalls_test": {
+      "type": "motoko",
+      "main": "test/MetacallsTest.mo"
     }
   },
   "dfx": "0.14.0",
