@@ -1,5 +1,6 @@
 /// Type declarations for the library.
 
+import Result "mo:base/Result";
 import UUID "mo:uuid/UUID";
 import Common "Common";
 
@@ -58,8 +59,5 @@ module {
         expired_msg_uuids : [UUID];
     };
 
-    public type Result<X> = {
-        #Ok : X;
-        #Err : Text;
-    };
+    public type Result<X> = Result.Result<X, Text>;
 };

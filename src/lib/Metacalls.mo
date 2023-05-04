@@ -82,9 +82,9 @@ module {
             });
 
             State.addDerivedIdentity(lib.state, key_name, public_key);
-            #Ok({ key_name = key_name });
+            #ok({ key_name = key_name });
         } catch (err) {
-            #Err(Error.message(err));
+            #err(Error.message(err));
         };
     };
 
@@ -93,7 +93,7 @@ module {
         lib : MetacallsLib
     ) : async Result<ListDerivedIdentitiesResponse> {
         let identities = State.getAllDerivedIdentities(lib.state);
-        #Ok({ identities = identities });
+        #ok({ identities = identities });
     };
 
     /// Create a message which can be signed and sent later.
@@ -117,7 +117,7 @@ module {
         };
         State.setMessage(lib.state, id, message);
 
-        #Ok({ uuid = id });
+        #ok({ uuid = id });
     };
 
     /// Sign a message with the provided `key_name`.
@@ -131,10 +131,10 @@ module {
         req : SignMessageRequest,
     ) : async Result<SignMessageResponse> {
         let ?msg = State.getMessage(lib.state, req.uuid) else {
-            return #Err("The message with the given uuid does not exist");
+            return #err("The message with the given uuid does not exist");
         };
         let ?identity = State.getDerivedIdentity(lib.state, req.key_name) else {
-            return #Err("The key with the given name does not exist");
+            return #err("The key with the given name does not exist");
         };
 
         Cycles.add(lib.state.config.sign_cycles);
@@ -153,7 +153,7 @@ module {
         msg.last_updated_ts := Time.now();
         State.setMessage(lib.state, req.uuid, msg);
 
-        #Ok({});
+        #ok({});
     };
 
     /// Send a signed message to the provided http endpoint using `http_request`.
@@ -170,13 +170,13 @@ module {
         req : SendOutgoingMessageRequest,
     ) : async Result<SendOutgoingMessageResponse> {
         let ?msg = State.getMessage(lib.state, req.msg_uuid) else {
-            return #Err("The message with the given uuid does not exist");
+            return #err("The message with the given uuid does not exist");
         };
         if (msg.status != #Signed) {
-            return #Err("Only signed messages can be sent");
+            return #err("Only signed messages can be sent");
         };
         let ?signed_msg = msg.signed_message else {
-            return #Err("Inconsistent state. status = #Signed but signed_message = null");
+            return #err("Inconsistent state. status = #Signed but signed_message = null");
         };
 
         let request : Common.CanisterHttpRequestArgs = {
@@ -203,9 +203,9 @@ module {
             msg.response := ?response;
             State.setMessage(lib.state, req.msg_uuid, msg);
 
-            #Ok(sendOutgoingMessageResponse);
+            #ok(sendOutgoingMessageResponse);
         } catch (err) {
-            #Err(Error.message(err));
+            #err(Error.message(err));
         };
     };
 
@@ -230,13 +230,13 @@ module {
             });
         };
 
-        #Ok({ messages = Buffer.toArray(res) });
+        #ok({ messages = Buffer.toArray(res) });
     };
 
     /// Update the `message_ttl_secs` config used to determine message expiration.
     public func updateMessageTtl(lib : MetacallsLib, new_ttl_secs : Int) : async Result<()> {
         State.updateMessageTtl(lib.state, new_ttl_secs);
-        #Ok(());
+        #ok(());
     };
 
     /// Trigger the cleanup of expired messages from the state.
@@ -244,6 +244,6 @@ module {
     /// The expiry of a message is determined based on its creation_ts and the `message_ttl_secs` config.
     public func cleanupExpiredMessages(lib : MetacallsLib) : async Result<CleanupExpiredMessagesResponse> {
         let expired_msg_uuids = State.cleanupExpiredMessages(lib.state);
-        #Ok({ expired_msg_uuids = expired_msg_uuids });
+        #ok({ expired_msg_uuids = expired_msg_uuids });
     };
 };
