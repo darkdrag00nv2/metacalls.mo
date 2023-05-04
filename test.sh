@@ -7,7 +7,7 @@ echo "Installing canisters..."
 
 dfx canister create --all
 dfx build --all
-dfx canister install metacalls_test --mode=reinstall
+dfx canister install metacalls_test --mode=reinstall --yes --upgrade-unchanged
 
 echo "Running tests..."
 
