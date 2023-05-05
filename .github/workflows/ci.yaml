@@ -37,3 +37,8 @@ jobs:
 
     - name: "check"
       run: make check
+
+    - name: "tests"
+      run: |
+       chmod +x test.sh
+       ./test.sh
