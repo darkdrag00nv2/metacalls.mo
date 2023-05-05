@@ -35,6 +35,10 @@ shared (deployer) actor class MetacallsTestRunner() = this {
     let env : State.Env = #Local;
     stable let lib = Metacalls.init(ic_management, env);
 
+    var cleanup_test_start = false;
+    var cleanup_test_success = false;
+    var start_time = Time.now();
+
     public shared func test() : async { #success; #fail : Text } {
         let suite = S.suite(
             "Test metacalls",
@@ -201,20 +205,42 @@ shared (deployer) actor class MetacallsTestRunner() = this {
             return #fail("Unexpected failure in updateMessageTtl");
         };
 
-        // Run the clean up after 1 sec and ensure that the message is cleaned up.
-        var pending = false;
-        func cleanupTest() : async () {
-            let cleanup_response = await Metacalls.cleanupExpiredMessages(lib);
-
-            // List Message.
-            let list_message_response = await Metacalls.listMessages(lib);
-            assert (Array.size(list_msg.messages) == 0);
-
-            pending := true;
-        };
-        ignore Timer.setTimer(#seconds(1), cleanupTest);
-        while (pending) {};
+        // Kickstart the cleanup via heartbeat.
+        start_time := Time.now();
+        cleanup_test_start := true;
 
         return #success;
+    };
+
+    private func cleanupMessage() : async () {
+        Debug.print("cleanup timer triggered");
+        let cleanup_response = await Metacalls.cleanupExpiredMessages(lib);
+
+        // List Message.
+        let list_message_response = await Metacalls.listMessages(lib);
+        let #ok(list_msg) = list_message_response else { return };
+        assert (Array.size(list_msg.messages) == 0);
+
+        Debug.print("Successful cleanup test");
+    };
+
+    public shared func testCleanupSuccess() : async {
+        #success;
+        #fail : Text;
+    } {
+        assert (cleanup_test_success == true);
+        return #success;
+    };
+
+    system func heartbeat() : async () {
+        if (cleanup_test_start) {
+            let now = Time.now();
+            let elapsed_seconds = (now - start_time) / 1000_000_000;
+            if (elapsed_seconds >= 1) {
+                cleanup_test_start := false;
+                await cleanupMessage();
+                cleanup_test_success := true;
+            };
+        };
     };
 };
