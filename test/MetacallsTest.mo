@@ -13,6 +13,7 @@ import State "../src/lib/State";
 import Types "../src/lib/Types";
 
 import TestUtils "TestUtils";
+import Array "mo:base/Array";
 
 shared (deployer) actor class MetacallsTestRunner() = this {
     type Testable<V> = T.Testable<V>;
@@ -38,8 +39,16 @@ shared (deployer) actor class MetacallsTestRunner() = this {
             "Test metacalls",
             [
                 S.test(
-                    "createAndListDerivedIdentity",
+                    "testCreateAndListDerivedIdentity",
                     switch (await testCreateAndListDerivedIdentity()) {
+                        case (#success) { true };
+                        case (_) { false };
+                    },
+                    M.equals<Bool>(T.bool(true)),
+                ),
+                S.test(
+                    "testCreateListAndSignMessage",
+                    switch (await testCreateListAndSignMessage()) {
                         case (#success) { true };
                         case (_) { false };
                     },
@@ -90,6 +99,62 @@ shared (deployer) actor class MetacallsTestRunner() = this {
         );
 
         S.run(suite);
+        return #success;
+    };
+
+    private func testCreateListAndSignMessage() : async {
+        #success;
+        #fail : Text;
+    } {
+        Debug.print("testing CreateListAndSignMessage");
+
+        let identity = await Metacalls.createDerivedIdentity(lib, "test_key_1");
+
+        // Create Message.
+        let message_response = await Metacalls.createMessage(lib, { msg = "RequestMessage" });
+        let #ok(msg) = message_response else {
+            return #fail("Unexpected failure in createMessage");
+        };
+        assert (Array.size(msg.uuid) > 0);
+
+        // List Message.
+        let list_message_response = await Metacalls.listMessages(lib);
+        let #ok(list_msg) = list_message_response else {
+            return #fail("Unexpected failure in listMessages");
+        };
+        assert (Array.size(list_msg.messages) == 1);
+        assert (list_msg.messages[0].uuid == msg.uuid);
+        assert (list_msg.messages[0].original_message == "RequestMessage");
+        assert (list_msg.messages[0].status == #Created);
+        assert (list_msg.messages[0].signed_message == null);
+        assert (list_msg.messages[0].signed_by == null);
+        assert (list_msg.messages[0].response == null);
+
+        // Sign Message.
+        let sign_message_response = await Metacalls.signMessage(
+            lib,
+            {
+                uuid = msg.uuid;
+                key_name = "test_key_1";
+            },
+        );
+        let #ok(signed_msg) = sign_message_response else {
+            return #fail("Unexpected failure in signMessage");
+        };
+
+        // List Message.
+        let list_message_response_2 = await Metacalls.listMessages(lib);
+        let #ok(list_msg_2) = list_message_response_2 else {
+            return #fail("Unexpected failure in listMessages");
+        };
+        assert (Array.size(list_msg_2.messages) == 1);
+        assert (list_msg_2.messages[0].uuid == msg.uuid);
+        assert (list_msg_2.messages[0].original_message == "RequestMessage");
+        assert (list_msg_2.messages[0].status == #Signed);
+        assert (list_msg_2.messages[0].signed_message != null);
+        assert (list_msg_2.messages[0].signed_by != null);
+        assert (list_msg_2.messages[0].response == null);
+
         return #success;
     };
 };
