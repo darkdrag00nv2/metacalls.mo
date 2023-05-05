@@ -2,6 +2,7 @@ import M "mo:matchers/Matchers";
 import T "mo:matchers/Testable";
 import S "mo:matchers/Suite";
 import Debug "mo:base/Debug";
+import Timer "mo:base/Timer";
 import Result "mo:base/Result";
 import Principal "mo:base/Principal";
 import Time "mo:base/Time";
@@ -49,6 +50,14 @@ shared (deployer) actor class MetacallsTestRunner() = this {
                 S.test(
                     "testCreateListAndSignMessage",
                     switch (await testCreateListAndSignMessage()) {
+                        case (#success) { true };
+                        case (_) { false };
+                    },
+                    M.equals<Bool>(T.bool(true)),
+                ),
+                S.test(
+                    "testCleanupExpiredMessages",
+                    switch (await testCleanupExpiredMessages()) {
                         case (#success) { true };
                         case (_) { false };
                     },
@@ -154,6 +163,57 @@ shared (deployer) actor class MetacallsTestRunner() = this {
         assert (list_msg_2.messages[0].signed_message != null);
         assert (list_msg_2.messages[0].signed_by != null);
         assert (list_msg_2.messages[0].response == null);
+
+        return #success;
+    };
+
+    private func testCleanupExpiredMessages() : async {
+        #success;
+        #fail : Text;
+    } {
+        Debug.print("testing CleanupExpiredMessages");
+
+        let identity = await Metacalls.createDerivedIdentity(lib, "test_key_1");
+
+        // Create Message.
+        let message_response = await Metacalls.createMessage(lib, { msg = "RequestMessage2" });
+        let #ok(msg) = message_response else {
+            return #fail("Unexpected failure in createMessage");
+        };
+        assert (Array.size(msg.uuid) > 0);
+
+        // List Message.
+        let list_message_response = await Metacalls.listMessages(lib);
+        let #ok(list_msg) = list_message_response else {
+            return #fail("Unexpected failure in listMessages");
+        };
+        assert (Array.size(list_msg.messages) == 2);
+        assert (list_msg.messages[1].uuid == msg.uuid);
+        assert (list_msg.messages[1].original_message == "RequestMessage2");
+        assert (list_msg.messages[1].status == #Created);
+        assert (list_msg.messages[1].signed_message == null);
+        assert (list_msg.messages[1].signed_by == null);
+        assert (list_msg.messages[1].response == null);
+
+        // Set expiration timeout to 1 second.
+        let update_ttl_response = await Metacalls.updateMessageTtl(lib, 1);
+        let #ok(x) = update_ttl_response else {
+            return #fail("Unexpected failure in updateMessageTtl");
+        };
+
+        // Run the clean up after 1 sec and ensure that the message is cleaned up.
+        var pending = false;
+        func cleanupTest() : async () {
+            let cleanup_response = await Metacalls.cleanupExpiredMessages(lib);
+
+            // List Message.
+            let list_message_response = await Metacalls.listMessages(lib);
+            assert (Array.size(list_msg.messages) == 0);
+
+            pending := true;
+        };
+        ignore Timer.setTimer(#seconds(1), cleanupTest);
+        while (pending) {};
 
         return #success;
     };

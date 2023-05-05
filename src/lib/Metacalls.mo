@@ -71,6 +71,10 @@ module {
         lib : MetacallsLib,
         key_name : Text,
     ) : async Result<CreateDerivedIdentityResponse> {
+        if (State.getDerivedIdentity(lib.state, key_name) != null) {
+            return #err("The key with the given name already exists");
+        };
+
         try {
             let { public_key } = await lib.icManagement.ecdsa_public_key({
                 canister_id = null;
