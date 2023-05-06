@@ -1,6 +1,12 @@
 /// Stable class adding support for metacalls in Motoko.
 ///
-/// TODO
+/// The library uses stable data structures to simplify upgrades.
+///
+/// Supports the following:
+/// - Creating & Listing Identities (t-ecdsa keys)
+/// - Creating, Signing and Sending messages via `http_request` outcall
+/// - Listing all the created messages
+/// - Cleaning up of expired request details
 import Types "Types";
 import Common "Common";
 import Principal "mo:base/Principal";
