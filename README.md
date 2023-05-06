@@ -25,3 +25,14 @@ To run the tests locally, execute the following command
 ```bash
 ./test.sh
 ```
+
+### License
+
+This library is distributed under the terms of the Apache License (Version 2.0). See LICENSE for details.
+
+### Funding
+
+This library was initially incentivized by [ICDevs](https://icdevs.org/). You can view more about
+the bounty on the
+[forum](https://forum.dfinity.org/t/open-icdevs-org-bounty-23a-metacalls-motoko-up-to-10k/15422).
+If you use this library and gain value from it, please consider a donation to ICDevs.
