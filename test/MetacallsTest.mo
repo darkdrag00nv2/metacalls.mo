@@ -33,7 +33,7 @@ shared (deployer) actor class MetacallsTestRunner() = this {
 
     let ic_management : IcManagement.IcManagement = actor ("aaaaa-aa");
     let env : State.Env = #Local;
-    stable let lib = Metacalls.init(ic_management, env, 0);
+    stable let lib = Metacalls.init(ic_management, env, 15_415_953_846);
 
     var cleanup_test_start = false;
     var cleanup_test_success = false;

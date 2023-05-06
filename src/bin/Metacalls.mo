@@ -34,7 +34,7 @@ actor NoKeyWallet {
     stable let lib = Metacalls.init(
         ic_management,
         env,
-        2_000_000_000,
+        15_415_953_846,
     );
 
     /// Create an identity with the provided name.

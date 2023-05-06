@@ -3,7 +3,8 @@
   "canisters": {
     "metacalls": {
       "type": "motoko",
-      "main": "src/bin/Metacalls.mo"
+      "main": "src/bin/Metacalls.mo",
+      "candid": "src/declarations/metacalls/metacalls.did"
     },
     "metacalls_test": {
       "type": "motoko",
@@ -11,6 +12,12 @@
     }
   },
   "dfx": "0.14.0",
+  "networks": {
+    "local": {
+      "bind": "127.0.0.1:8000",
+      "type": "ephemeral"
+    }
+  },
   "defaults": {
     "build": {
       "packtool": "vessel sources",
