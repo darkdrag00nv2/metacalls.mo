@@ -41,13 +41,21 @@ module {
         url : Text;
         headers : [Common.HttpHeader];
         method : Common.HttpMethod;
+        /// This is useful when number of replicas > 1.
+        /// Each replica sends the http request to the target.
+        /// If the response received from the service can be different (say because of timestamp),
+        /// this transformation function can be used to ignore the fields that don't matter.
         transform : ?Common.TransformContext;
+        /// Set this to a reasonable value to avoid huge costs. 
+        /// The default is 2MB which can be very expensive.
         max_response_bytes : ?Nat64;
     };
 
     public type SendOutgoingMessageResponse = {
         status : Nat;
         headers : [Common.HttpHeader];
+        /// The response body sent by the target service.
+        /// Consider using a json library like NatLabs/serde to parse into a static type.
         body : [Nat8];
     };
 

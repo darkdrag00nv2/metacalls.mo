@@ -37,6 +37,7 @@ module {
         env : Env;
         key_name : Text;
         sign_cycles : Nat;
+        http_outcall_cycles : Nat;
         var message_ttl_secs : Int;
     };
 
@@ -52,13 +53,14 @@ module {
         var messages : Map<Text, Message>;
     };
 
-    public func initState(env : Env) : State {
+    public func initState(env : Env, http_outcall_cycles : Nat) : State {
         let config : Config = switch (env) {
             case (#Local) {
                 {
                     env = env;
                     key_name = "dfx_test_key";
                     sign_cycles = 0;
+                    http_outcall_cycles = http_outcall_cycles;
                     var message_ttl_secs = 3600;
                 };
             };
@@ -67,6 +69,7 @@ module {
                     env = env;
                     key_name = "test_key_1";
                     sign_cycles = 10_000_000_000;
+                    http_outcall_cycles = http_outcall_cycles;
                     var message_ttl_secs = 3600;
                 };
             };
@@ -75,6 +78,7 @@ module {
                     env = env;
                     key_name = "key_1";
                     sign_cycles = 26_153_846_153;
+                    http_outcall_cycles = http_outcall_cycles;
                     var message_ttl_secs = 3600;
                 };
             };

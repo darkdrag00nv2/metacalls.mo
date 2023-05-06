@@ -59,9 +59,10 @@ module {
     public func init(
         initIcManagement : IcManagement,
         env : Env,
+        http_outcall_cycles : Nat,
     ) : MetacallsLib = {
         icManagement = initIcManagement;
-        state = State.initState(env);
+        state = State.initState(env, http_outcall_cycles);
     };
 
     /// Create a derived identity for the provided principal.
@@ -193,7 +194,7 @@ module {
         };
 
         try {
-            Cycles.add(lib.state.config.sign_cycles);
+            Cycles.add(lib.state.config.http_outcall_cycles);
             let response = await lib.icManagement.http_request(request);
 
             let sendOutgoingMessageResponse : SendOutgoingMessageResponse = {
